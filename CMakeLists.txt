@@ -61,9 +61,9 @@ add_custom_command(TARGET GUI POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E copy
         ${CMAKE_CURRENT_SOURCE_DIR}/dark.qss
         $<TARGET_FILE_DIR:GUI>/dark.qss
-    COMMAND ${CMAKE_COMMAND} -E copy
-        ${CMAKE_CURRENT_SOURCE_DIR}/icnos/logo.png
-        $<TARGET_FILE_DIR:GUI>/icnos/logo.png
+    COMMAND ${CMAKE_COMMAND} -E copy_directory
+        ${CMAKE_CURRENT_SOURCE_DIR}/icnos
+        $<TARGET_FILE_DIR:GUI>/icnos
 )
 
 include(GNUInstallDirs)
