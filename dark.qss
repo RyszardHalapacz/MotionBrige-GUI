@@ -15,10 +15,69 @@ QFrame {
     border-radius: 6px;
 }
 
+QFrame#topBar {
+    background-color: #151b23;
+    border: 1px solid #2d3a4d;
+    border-radius: 6px;
+}
+
+QFrame#sidebar {
+    background-color: #111821;
+    border: 1px solid #263246;
+    border-radius: 6px;
+}
+
+QFrame#sidebarBox {
+    background-color: #151b23;
+    border: 1px solid #293241;
+    border-radius: 6px;
+}
+
+QFrame#editorPanel {
+    background-color: #151b23;
+    border: 1px solid #293241;
+    border-radius: 6px;
+}
+
+QFrame#editorPanel[active="true"] {
+    border: 2px solid #2a8fff;
+    background-color: #172131;
+}
+
 QLabel {
     background: transparent;
     border: none;
     color: #d7dde7;
+}
+
+QLabel#sectionTitle {
+    color: #9db6d8;
+    font-weight: 700;
+    font-size: 12px;
+    letter-spacing: 1px;
+}
+
+QLabel#panelTitle {
+    color: #f2f6ff;
+    font-weight: 600;
+}
+
+QLabel#targetInfo {
+    color: #d7dde7;
+    font-family: "Consolas";
+    line-height: 1.35;
+}
+
+QLabel#watermark {
+    color: #3d4858;
+    font-size: 72px;
+    font-weight: 800;
+}
+
+QLabel#logoFallback {
+    color: #6fc6ff;
+    font-weight: 800;
+    font-size: 18px;
 }
 
 QPushButton {
@@ -31,6 +90,7 @@ QPushButton {
 
 QPushButton:hover {
     background-color: #243246;
+    border-color: #4c6380;
 }
 
 QPushButton#translateBtn {
@@ -46,6 +106,27 @@ QPushButton#translateBtn {
 QPushButton#translateBtn:hover {
     background-color: #1a6fbd;
     border-color: #4da6ff;
+}
+
+QPushButton#fileCard {
+    background-color: #101820;
+    color: #d7dde7;
+    border: 1px solid #2b3a4d;
+    border-radius: 7px;
+    padding: 8px 10px;
+    text-align: left;
+    font-weight: 500;
+}
+
+QPushButton#fileCard:hover {
+    background-color: #162235;
+    border-color: #3d75b8;
+}
+
+QPushButton#fileCard:checked {
+    background-color: #102a45;
+    border: 2px solid #2a8fff;
+    color: #ffffff;
 }
 
 QPlainTextEdit {
