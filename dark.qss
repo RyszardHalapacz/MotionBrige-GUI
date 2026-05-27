@@ -1,0 +1,82 @@
+QMainWindow {
+    background-color: #0f141b;
+}
+
+QWidget {
+    background-color: #0f141b;
+    color: #d7dde7;
+    font-family: "Segoe UI";
+    font-size: 13px;
+}
+
+QFrame {
+    background-color: #151b23;
+    border: 1px solid #293241;
+    border-radius: 6px;
+}
+
+QLabel {
+    background: transparent;
+    border: none;
+    color: #d7dde7;
+}
+
+QPushButton {
+    background-color: #1b2430;
+    color: #e8eef8;
+    border: 1px solid #344154;
+    border-radius: 6px;
+    padding: 8px 14px;
+}
+
+QPushButton:hover {
+    background-color: #243246;
+}
+
+QPushButton#translateBtn {
+    background-color: #0d4f8c;
+    color: #e8f4ff;
+    border: 1px solid #2a8fff;
+    border-radius: 6px;
+    padding: 8px 32px;
+    font-weight: bold;
+    font-size: 14px;
+}
+
+QPushButton#translateBtn:hover {
+    background-color: #1a6fbd;
+    border-color: #4da6ff;
+}
+
+QPlainTextEdit {
+    background-color: #101820;
+    color: #d7dde7;
+    border: 1px solid #293241;
+    border-radius: 6px;
+    padding: 8px;
+    selection-background-color: #264f78;
+    font-family: "Consolas";
+    font-size: 13px;
+}
+
+QPlainTextEdit:focus {
+    border: 1px solid #388bfd;
+}
+
+QSplitter::handle {
+    background-color: #0f141b;
+}
+
+QSplitter::handle:horizontal {
+    width: 8px;
+}
+
+QSplitter::handle:vertical {
+    height: 8px;
+}
+
+QStatusBar {
+    background-color: #151b23;
+    color: #8899aa;
+    border-top: 1px solid #293241;
+}
