@@ -5,7 +5,9 @@
 #include <QString>
 
 #include "motionbridge_api.h"
+#include "pipeline_options.h"
 
+class QComboBox;
 class QFrame;
 class QLabel;
 class QPlainTextEdit;
@@ -34,11 +36,13 @@ private slots:
     void onCancel();
     void onProgressTick();
     void onTranslateDone(int rc);
+    void onBackendChanged(int index);
 
 private:
     enum class FocusPanel { Gcode, Yaml, Src, Dat };
 
     TranslationCallback m_engineFn      = nullptr;
+    PipelineOptions     m_pipelineOpts;
 
     QTimer*  m_progressTimer    = nullptr;
     QString  m_progressFilePath;
@@ -80,10 +84,14 @@ private:
     QPushButton  *m_cancelBtn    = nullptr;
     QProgressBar *m_progressBar  = nullptr;
 
-    QLabel *m_targetInfoLabel = nullptr;
+    // configuration combos
+    QComboBox *m_frontendCombo = nullptr;
+    QComboBox *m_backendCombo  = nullptr;
+    QComboBox *m_robotCombo    = nullptr;
 
     QWidget* buildTopBar();
     QWidget* buildSideBar();
+    QWidget* buildConfigSection(const PipelineOptions& opts);
     QWidget* buildWorkspace();
     QWidget* buildDiagnostics();
 

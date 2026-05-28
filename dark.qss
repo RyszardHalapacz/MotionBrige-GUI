@@ -161,3 +161,58 @@ QStatusBar {
     color: #8899aa;
     border-top: 1px solid #293241;
 }
+
+QLabel#configLabel {
+    color: #7a99bb;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+}
+
+QComboBox {
+    background-color: #1b2430;
+    color: #e8eef8;
+    border: 1px solid #344154;
+    border-radius: 5px;
+    padding: 5px 10px;
+    min-height: 26px;
+}
+
+QComboBox:hover {
+    border-color: #4c6380;
+    background-color: #243246;
+}
+
+QComboBox:focus {
+    border-color: #2a8fff;
+}
+
+QComboBox::drop-down {
+    border: none;
+    width: 20px;
+}
+
+QComboBox::down-arrow {
+    border-left:  4px solid transparent;
+    border-right: 4px solid transparent;
+    border-top:   5px solid #7a99bb;
+    width: 0;
+    height: 0;
+}
+
+QComboBox:disabled {
+    background-color: #131a22;
+    color: #3d4858;
+    border-color: #1e2835;
+}
+
+QComboBox QAbstractItemView {
+    background-color: #151b23;
+    color: #d7dde7;
+    border: 1px solid #344154;
+    border-radius: 5px;
+    padding: 4px;
+    selection-background-color: #102a45;
+    selection-color: #ffffff;
+    outline: none;
+}

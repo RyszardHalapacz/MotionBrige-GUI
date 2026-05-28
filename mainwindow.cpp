@@ -1,4 +1,5 @@
 #include "mainwindow.h"
+#include "pipeline_options.h"
 
 #include <QApplication>
 #include <QButtonGroup>
@@ -10,6 +11,7 @@
 #include <QImage>
 #include <QKeyEvent>
 #include <QLabel>
+#include <QComboBox>
 #include <QMetaObject>
 #include <QPixmap>
 #include <QPlainTextEdit>
@@ -18,7 +20,6 @@
 #include <QRegularExpression>
 #include <QScreen>
 #include <QSplitter>
-#include <QStandardPaths>
 #include <QStatusBar>
 #include <QStyle>
 #include <QThread>
@@ -40,40 +41,41 @@ extern "C" void setPTR(TranslationCallback cb)  { g_engineFn = cb; }
 
 static QWidget* createSplashScreen()
 {
-    auto* splash = new QWidget(nullptr, Qt::FramelessWindowHint | Qt::SplashScreen);
+    auto* splash = new QWidget(nullptr);
+    splash->setWindowTitle("MotionBridge Studio");
     splash->setObjectName("splashScreen");
     splash->setAttribute(Qt::WA_DeleteOnClose);
-    splash->resize(900, 560);
     splash->setStyleSheet(R"(
         QWidget#splashScreen {
             background-color: #0f141b;
-            border: 1px solid #293241;
         }
         QLabel#splashLogo {
-            background: transparent;
-            color: #d7dde7;
-            font-family: "Segoe UI";
-            font-size: 28px;
-            font-weight: 600;
+            background-color: #0f141b;
+            border: none;
         }
     )");
 
+    const QPixmap pixmap(QApplication::applicationDirPath() + "/icnos/content.png");
+
     auto* layout = new QVBoxLayout(splash);
-    layout->setContentsMargins(48, 48, 48, 48);
+    layout->setContentsMargins(0, 0, 0, 0);
+    layout->setSpacing(0);
 
     auto* logo = new QLabel(splash);
     logo->setObjectName("splashLogo");
     logo->setAlignment(Qt::AlignCenter);
 
-    const QPixmap pixmap(QApplication::applicationDirPath() + "/icnos/content.png");
-    if (!pixmap.isNull())
-        logo->setPixmap(pixmap.scaled(760, 430, Qt::KeepAspectRatio, Qt::SmoothTransformation));
-    else
+    if (!pixmap.isNull()) {
+        const QSize sz = pixmap.size().scaled(900, 560, Qt::KeepAspectRatio);
+        splash->resize(sz);
+        logo->setPixmap(pixmap.scaled(sz, Qt::KeepAspectRatio, Qt::SmoothTransformation));
+    } else {
+        splash->resize(900, 560);
         logo->setText("MotionBridge Studio");
+        logo->setStyleSheet("color: #d7dde7; font-size: 28px; font-weight: 600;");
+    }
 
-    layout->addStretch();
-    layout->addWidget(logo, 0, Qt::AlignCenter);
-    layout->addStretch();
+    layout->addWidget(logo);
 
     if (const QScreen* screen = QGuiApplication::primaryScreen()) {
         const QRect geometry = screen->availableGeometry();
@@ -95,7 +97,7 @@ extern "C" int runGUI(int argc, char* argv[])
     auto* splash = createSplashScreen();
     splash->show();
 
-    QTimer::singleShot(2500, [splash]() {
+    QTimer::singleShot(5000, [splash]() {
         g_mainWindow = new MainWindow;
         g_mainWindow->setEngineCallback(g_engineFn);
         splash->close();
@@ -168,19 +170,6 @@ static QLabel* makeSectionTitle(const QString &text, QWidget *parent)
     return label;
 }
 
-static QLabel* makeTargetInfo(QWidget *parent)
-{
-    auto* info = new QLabel(parent);
-    info->setObjectName("targetInfo");
-    info->setText(
-        "Backend          KUKA (KRL)\n"
-        "Robot            KR 120 R2700\n"
-        "Profile          default\n"
-        "Mode             TRANSFORM\n"
-        "Status           ● Ready"
-    );
-    return info;
-}
 
 // ============================================================================
 //  MainWindow
@@ -334,14 +323,11 @@ QWidget* MainWindow::buildSideBar()
     outputLayout->addWidget(m_srcCard);
     outputLayout->addWidget(m_datCard);
 
-    auto* targetBox = new QFrame(sidebar);
-    targetBox->setObjectName("sidebarBox");
-    m_targetInfoLabel = makeTargetInfo(targetBox);
-    auto* targetLayout = new QVBoxLayout(targetBox);
-    targetLayout->setContentsMargins(10, 10, 10, 10);
-    targetLayout->setSpacing(8);
-    targetLayout->addWidget(makeSectionTitle("TARGET", targetBox));
-    targetLayout->addWidget(m_targetInfoLabel);
+    /* Załaduj opcje pipeline'u z zasobu Qt */
+    const auto loaded = PipelineOptionsLoader::load(":/config/pipeline_options.yaml");
+    if (!loaded)
+        statusBar()->showMessage("Warning: pipeline_options.yaml not loaded — using defaults", 5000);
+    m_pipelineOpts = loaded.value_or(PipelineOptionsLoader::fallback());
 
     auto* watermark = new QLabel("M", sidebar);
     watermark->setObjectName("watermark");
@@ -349,11 +335,74 @@ QWidget* MainWindow::buildSideBar()
 
     layout->addWidget(inputBox);
     layout->addWidget(outputBox);
-    layout->addWidget(targetBox);
+    layout->addWidget(buildConfigSection(m_pipelineOpts));
     layout->addStretch();
     layout->addWidget(watermark);
 
     return sidebar;
+}
+
+QWidget* MainWindow::buildConfigSection(const PipelineOptions& opts)
+{
+    auto* box = new QFrame(this);
+    box->setObjectName("sidebarBox");
+
+    auto* layout = new QVBoxLayout(box);
+    layout->setContentsMargins(10, 10, 10, 10);
+    layout->setSpacing(4);
+
+    layout->addWidget(makeSectionTitle("CONFIGURATION", box));
+
+    auto addLabel = [&](const QString& text) {
+        auto* lbl = new QLabel(text, box);
+        lbl->setObjectName("configLabel");
+        layout->addSpacing(6);
+        layout->addWidget(lbl);
+    };
+
+    /* Frontend */
+    addLabel("Frontend");
+    m_frontendCombo = new QComboBox(box);
+    m_frontendCombo->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
+    for (const auto& opt : opts.frontends)
+        m_frontendCombo->addItem(opt.label, opt.id);
+    layout->addWidget(m_frontendCombo);
+
+    /* Backend */
+    addLabel("Backend");
+    m_backendCombo = new QComboBox(box);
+    m_backendCombo->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
+    for (const auto& backend : opts.backends)
+        m_backendCombo->addItem(backend.label, backend.id);
+    layout->addWidget(m_backendCombo);
+
+    /* Robot — dynamiczny, zależny od wybranego backendu */
+    addLabel("Robot");
+    m_robotCombo = new QComboBox(box);
+    m_robotCombo->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
+    if (!opts.backends.isEmpty())
+        for (const auto& robot : opts.backends[0].robots)
+            m_robotCombo->addItem(robot.label, robot.id);
+    layout->addWidget(m_robotCombo);
+
+    connect(m_backendCombo, &QComboBox::currentIndexChanged,
+            this, &MainWindow::onBackendChanged);
+
+    return box;
+}
+
+void MainWindow::onBackendChanged(int index)
+{
+    if (!m_robotCombo) return;
+    m_robotCombo->clear();
+
+    if (index < 0 || index >= m_pipelineOpts.backends.size()) return;
+
+    const auto& robots = m_pipelineOpts.backends[index].robots;
+    for (const auto& robot : robots)
+        m_robotCombo->addItem(robot.label, robot.id);
+
+    m_robotCombo->setEnabled(!robots.isEmpty());
 }
 
 // ============================================================================
@@ -427,9 +476,7 @@ void MainWindow::onTranslate()
     }
 
     /* Katalog roboczy w temp */
-    const QString workDir =
-        QStandardPaths::writableLocation(QStandardPaths::TempLocation)
-        + "/motionbridge_studio";
+    const QString workDir = QApplication::applicationDirPath() + "/motionbridge_studio";
     QDir().mkpath(workDir);
 
     /* Ścieżki plików */
@@ -457,7 +504,7 @@ void MainWindow::onTranslate()
         if (f.open(QFile::WriteOnly | QFile::Text)) {
             QTextStream s(&f);
             s << "input:\n"
-              << "  gcode: \"" << gcodePath << "\"\n";
+              << "  gcode:             \"" << gcodePath << "\"\n";
             if (!m_yamlEditor->toPlainText().trimmed().isEmpty()) {
                 const QString ctxPath = workDir + "/context.yaml";
                 QFile ctx(ctxPath);
@@ -466,11 +513,12 @@ void MainWindow::onTranslate()
                 s << "  reference_context: \"" << ctxPath << "\"\n";
             }
             s << "translation:\n"
-              << "  frontend: gcode_printer3d\n"
-              << "  backend: kuka_krl\n"
+              << "  frontend: \"" << m_frontendCombo->currentData().toString() << "\"\n"
+              << "  backend:  \"" << m_backendCombo->currentData().toString()  << "\"\n"
+              << "  robot:    \"" << m_robotCombo->currentData().toString()    << "\"\n"
               << "output:\n"
-              << "  dir: \"" << workDir << "/\"\n"
-              << "  result_file: \"motionbridge_result.yaml\"\n"
+              << "  dir:           \"" << workDir << "\"\n"
+              << "  result_file:   \"motionbridge_result.yaml\"\n"
               << "  progress_file: \"" << m_progressFilePath << "\"\n";
         }
     }
@@ -616,16 +664,6 @@ void MainWindow::setBusyUi(bool busy)
     m_progressBar->setVisible(busy);
     m_openGcodeBtn->setEnabled(!busy);
     m_openYamlBtn->setEnabled(!busy);
-
-    if (m_targetInfoLabel) {
-        const QString status = busy ? "● Working" : "● Ready";
-        m_targetInfoLabel->setText(
-            "Backend          KUKA (KRL)\n"
-            "Robot            KR 120 R2700\n"
-            "Profile          default\n"
-            "Mode             TRANSFORM\n"
-            "Status           " + status);
-    }
 }
 
 // ============================================================================

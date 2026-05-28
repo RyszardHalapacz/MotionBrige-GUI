@@ -18,12 +18,18 @@ set(PROJECT_SOURCES
         mainwindow.h
         motionbridge_api.h
         dummy_engine.cpp
+        pipeline_options.h
+        pipeline_options.cpp
 )
 
 if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
     qt_add_executable(GUI
         MANUAL_FINALIZATION
         ${PROJECT_SOURCES}
+    )
+    qt_add_resources(GUI "config"
+        PREFIX "/config"
+        FILES resources/config/pipeline_options.yaml
     )
 else()
     if(ANDROID)

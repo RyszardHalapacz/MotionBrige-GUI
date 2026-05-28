@@ -1,0 +1,28 @@
+frontends:
+  - id: gcode_printer3d
+    label: GCode 3D Printer
+  - id: gcode_cnc
+    label: GCode CNC
+
+backends:
+  - id: kuka_krl
+    label: KUKA KRL
+    robots:
+      - id: kr120_r2700
+        label: KR120 R2700
+      - id: kr640_r2800_2
+        label: KR640 R2800-2
+
+  - id: urscript
+    label: URScript
+    robots:
+      - id: ur5e
+        label: UR5e
+      - id: ur10e
+        label: UR10e
+
+  - id: debug
+    label: Debug
+    robots:
+      - id: pseudo_robot_3d
+        label: Pseudo Robot 3D
