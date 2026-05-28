@@ -34,8 +34,9 @@
 static TranslationCallback g_engineFn   = nullptr;
 static QString             g_configPath;
 
-extern "C" void setPTR(TranslationCallback cb)        { g_engineFn = cb; }
-extern "C" void setConfigPath(const char* path)       { g_configPath = QString::fromUtf8(path); }
+extern "C" void        setPTR(TranslationCallback cb)  { g_engineFn = cb; }
+extern "C" void        setConfigPath(const char* path) { g_configPath = QString::fromUtf8(path); }
+extern "C" const char* getVersion()                    { return "0.1.0"; }
 
 // ============================================================================
 //  Splash screen

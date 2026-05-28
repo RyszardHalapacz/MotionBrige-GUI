@@ -12,66 +12,37 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 find_package(QT NAMES Qt6 Qt5 REQUIRED COMPONENTS Widgets)
 find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Widgets)
 
-set(PROJECT_SOURCES
-        main.cpp
-        mainwindow.cpp
-        mainwindow.h
-        motionbridge_api.h
-        dummy_engine.cpp
-        pipeline_options.h
-        pipeline_options.cpp
+# ============================================================================
+#  motionbridge_gui — DLL eksportująca setPTR / setConfigPath / runGUI
+# ============================================================================
+
+add_library(motionbridge_gui SHARED
+    mainwindow.cpp
+    mainwindow.h
+    motionbridge_api.h
+    pipeline_options.h
+    pipeline_options.cpp
 )
 
-if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
-    qt_add_executable(GUI
-        MANUAL_FINALIZATION
-        ${PROJECT_SOURCES}
-    )
-    qt_add_resources(GUI "config"
-        PREFIX "/config"
-        FILES resources/config/pipeline_options.yaml
-    )
-else()
-    if(ANDROID)
-        add_library(GUI SHARED
-            ${PROJECT_SOURCES}
-        )
-    else()
-        add_executable(GUI
-            ${PROJECT_SOURCES}
-        )
-    endif()
-endif()
+target_compile_definitions(motionbridge_gui PRIVATE MOTIONBRIDGE_GUI_EXPORTS)
+target_link_libraries(motionbridge_gui PRIVATE Qt${QT_VERSION_MAJOR}::Widgets)
 
-target_link_libraries(GUI PRIVATE Qt${QT_VERSION_MAJOR}::Widgets)
-
-if(${QT_VERSION} VERSION_LESS 6.1.0)
-  set(BUNDLE_ID_OPTION MACOSX_BUNDLE_GUI_IDENTIFIER com.example.GUI)
-endif()
-set_target_properties(GUI PROPERTIES
-    ${BUNDLE_ID_OPTION}
-    MACOSX_BUNDLE_BUNDLE_VERSION ${PROJECT_VERSION}
-    MACOSX_BUNDLE_SHORT_VERSION_STRING ${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}
-    MACOSX_BUNDLE TRUE
-    WIN32_EXECUTABLE TRUE
+qt_add_resources(motionbridge_gui "config"
+    PREFIX "/config"
+    FILES resources/config/pipeline_options.yaml
 )
 
-add_custom_command(TARGET GUI POST_BUILD
+add_custom_command(TARGET motionbridge_gui POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E copy
         ${CMAKE_CURRENT_SOURCE_DIR}/dark.qss
-        $<TARGET_FILE_DIR:GUI>/dark.qss
+        $<TARGET_FILE_DIR:motionbridge_gui>/dark.qss
     COMMAND ${CMAKE_COMMAND} -E copy_directory
         ${CMAKE_CURRENT_SOURCE_DIR}/icnos
-        $<TARGET_FILE_DIR:GUI>/icnos
+        $<TARGET_FILE_DIR:motionbridge_gui>/icnos
 )
 
 include(GNUInstallDirs)
-install(TARGETS GUI
-    BUNDLE DESTINATION .
+install(TARGETS motionbridge_gui
     LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
     RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
 )
-
-if(QT_VERSION_MAJOR EQUAL 6)
-    qt_finalize_executable(GUI)
-endif()

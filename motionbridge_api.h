@@ -14,15 +14,26 @@
 #ifndef MOTIONBRIDGE_API_H
 #define MOTIONBRIDGE_API_H
 
+#ifdef _WIN32
+  #ifdef MOTIONBRIDGE_GUI_EXPORTS
+    #define MB_API __declspec(dllexport)
+  #else
+    #define MB_API __declspec(dllimport)
+  #endif
+#else
+  #define MB_API
+#endif
+
 #ifdef __cplusplus
 extern "C" {
 #endif
 
 typedef int (*TranslationCallback)(char const* yaml_path);
 
-void setPTR(TranslationCallback cb);
-void setConfigPath(const char* path);
-int  runGUI(int argc, char* argv[]);
+MB_API void        setPTR(TranslationCallback cb);
+MB_API void        setConfigPath(const char* path);
+MB_API int         runGUI(int argc, char* argv[]);
+MB_API const char* getVersion();
 
 #ifdef __cplusplus
 }
