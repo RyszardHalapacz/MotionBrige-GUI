@@ -8,10 +8,10 @@ backends:
   - id: kuka_krl
     label: KUKA KRL
     robots:
-      - id: kr120_r2700
-        label: KR120 R2700
       - id: kr640_r2800_2
-        label: KR640 R2800-2
+        label: KUKA KR 640 R2800-2
+      - id: kr4_r600
+        label: KUKA KR 4 R600
 
   - id: urscript
     label: URScript
@@ -21,8 +21,10 @@ backends:
       - id: ur10e
         label: UR10e
 
+  - id: pseudo_robot_3d
+    label: Pseudo Robot 3D
+    robots: []
+
   - id: debug
     label: Debug
-    robots:
-      - id: pseudo_robot_3d
-        label: Pseudo Robot 3D
+    robots: []

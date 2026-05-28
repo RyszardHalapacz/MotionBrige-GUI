@@ -148,22 +148,25 @@ PipelineOptions PipelineOptionsLoader::fallback()
     };
 
     BackendOption kuka;
-    kuka.id    = "kuka_krl";
-    kuka.label = "KUKA KRL";
-    kuka.robots = {{"kr120_r2700",  "KR120 R2700"},
-                   {"kr640_r2800_2","KR640 R2800-2"}};
+    kuka.id     = "kuka_krl";
+    kuka.label  = "KUKA KRL";
+    kuka.robots = {{"kr640_r2800_2", "KUKA KR 640 R2800-2"},
+                   {"kr4_r600",      "KUKA KR 4 R600"}};
 
     BackendOption ur;
-    ur.id    = "urscript";
-    ur.label = "URScript";
+    ur.id     = "urscript";
+    ur.label  = "URScript";
     ur.robots = {{"ur5e",  "UR5e"},
                  {"ur10e", "UR10e"}};
+
+    BackendOption pseudo;
+    pseudo.id    = "pseudo_robot_3d";
+    pseudo.label = "Pseudo Robot 3D";
 
     BackendOption dbg;
     dbg.id    = "debug";
     dbg.label = "Debug";
-    dbg.robots = {{"pseudo_robot_3d", "Pseudo Robot 3D"}};
 
-    opts.backends = {kuka, ur, dbg};
+    opts.backends = {kuka, ur, pseudo, dbg};
     return opts;
 }
