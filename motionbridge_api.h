@@ -21,6 +21,7 @@ extern "C" {
 typedef int (*TranslationCallback)(char const* yaml_path);
 
 void setPTR(TranslationCallback cb);
+void setConfigPath(const char* path);
 int  runGUI(int argc, char* argv[]);
 
 #ifdef __cplusplus

@@ -31,9 +31,11 @@
 //  Globalny wskaźnik do silnika — ustawiany przez setPTR przed runGUI
 // ============================================================================
 
-static TranslationCallback g_engineFn = nullptr;
+static TranslationCallback g_engineFn   = nullptr;
+static QString             g_configPath;
 
-extern "C" void setPTR(TranslationCallback cb)  { g_engineFn = cb; }
+extern "C" void setPTR(TranslationCallback cb)        { g_engineFn = cb; }
+extern "C" void setConfigPath(const char* path)       { g_configPath = QString::fromUtf8(path); }
 
 // ============================================================================
 //  Splash screen
@@ -323,8 +325,9 @@ QWidget* MainWindow::buildSideBar()
     outputLayout->addWidget(m_srcCard);
     outputLayout->addWidget(m_datCard);
 
-    /* Załaduj opcje pipeline'u z zasobu Qt */
-    const auto loaded = PipelineOptionsLoader::load(":/config/pipeline_options.yaml");
+    /* Załaduj opcje pipeline'u — ścieżka od silnika lub fallback na zasób Qt */
+    const QString yamlPath = g_configPath.isEmpty() ? ":/config/pipeline_options.yaml" : g_configPath;
+    const auto loaded = PipelineOptionsLoader::load(yamlPath);
     if (!loaded)
         statusBar()->showMessage("Warning: pipeline_options.yaml not loaded — using defaults", 5000);
     m_pipelineOpts = loaded.value_or(PipelineOptionsLoader::fallback());

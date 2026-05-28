@@ -7,5 +7,6 @@ extern "C" int runTranslationFromYaml(char const* yaml_path);
 int main(int argc, char *argv[])
 {
     setPTR(&runTranslationFromYaml);
+    setConfigPath("resources/config/pipeline_options.yaml");
     return runGUI(argc, argv);
 }
