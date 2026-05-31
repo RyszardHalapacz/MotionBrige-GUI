@@ -520,9 +520,15 @@ void MainWindow::onTranslate()
                 s << "  reference_context: \"" << ctxPath << "\"\n";
             }
             s << "translation:\n"
-              << "  frontend: \"" << m_frontendCombo->currentData().toString() << "\"\n"
-              << "  backend:  \"" << m_backendCombo->currentData().toString()  << "\"\n"
-              << "  robot:    \"" << m_robotCombo->currentData().toString()    << "\"\n"
+              << "  frontend: \"" << m_frontendCombo->currentData().toString() << "\"\n";
+
+            // Gdy robot combo aktywny i ma wybór → użyj pełnego ID robota z robot combo
+            // (np. "kuka_krl_kr640"). Gdy robot combo pusty/nieaktywny → użyj ID backendu
+            // (np. "urscript", "debug").
+            const QString backendId = (m_robotCombo->isEnabled() && m_robotCombo->count() > 0)
+                ? m_robotCombo->currentData().toString()
+                : m_backendCombo->currentData().toString();
+            s << "  backend:  \"" << backendId << "\"\n"
               << "output:\n"
               << "  dir:           \"" << workDir << "\"\n"
               << "  result_file:   \"motionbridge_result.yaml\"\n"
