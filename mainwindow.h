@@ -107,6 +107,7 @@ private:
     void saveFile(QPlainTextEdit *source, const QString &defaultName, const QString &filter);
     QString loadTextFile(const QString &path);
     void parseAndLoadResults();
+    void appendDiagWarning(const QString& msg);
 };
 
 #endif // MAINWINDOW_H

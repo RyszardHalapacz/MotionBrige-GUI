@@ -25,10 +25,13 @@ namespace fs = std::filesystem;
  * --------------------------------------------------------------------------*/
 static std::string yamlField(const std::string& src, const std::string& key)
 {
-    std::string pat = key + ": ";
+    std::string pat = key + ":";
     auto pos = src.find(pat);
     if (pos == std::string::npos) return {};
     pos += pat.size();
+
+    /* Pomiń spacje/taby po dwukropku — GUI wyrównuje wartości wieloma spacjami. */
+    while (pos < src.size() && (src[pos] == ' ' || src[pos] == '\t')) ++pos;
     if (pos >= src.size()) return {};
 
     if (src[pos] == '"') {
@@ -38,7 +41,9 @@ static std::string yamlField(const std::string& src, const std::string& key)
         return src.substr(pos, end - pos);
     }
     auto end = src.find_first_of("\r\n", pos);
-    return src.substr(pos, end == std::string::npos ? std::string::npos : end - pos);
+    std::string val = src.substr(pos, end == std::string::npos ? std::string::npos : end - pos);
+    while (!val.empty() && (val.back() == ' ' || val.back() == '\t')) val.pop_back();
+    return val;
 }
 
 /* --------------------------------------------------------------------------

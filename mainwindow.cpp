@@ -193,9 +193,12 @@ MainWindow::MainWindow(QWidget *parent)
     layout->setContentsMargins(8, 8, 8, 0);
     layout->setSpacing(8);
 
+    // buildDiagnostics() tworzy m_diagEditor — musi powstać PRZED buildWorkspace(),
+    // bo buildSideBar() może wywołać appendDiagWarning() (np. gdy load() YAML padnie).
+    QWidget* diagnostics = buildDiagnostics();
     layout->addWidget(buildTopBar());
     layout->addWidget(buildWorkspace());
-    layout->addWidget(buildDiagnostics());
+    layout->addWidget(diagnostics);
 
     setCentralWidget(central);
 
@@ -330,7 +333,7 @@ QWidget* MainWindow::buildSideBar()
     const QString yamlPath = g_configPath.isEmpty() ? ":/config/pipeline_options.yaml" : g_configPath;
     const auto loaded = PipelineOptionsLoader::load(yamlPath);
     if (!loaded)
-        statusBar()->showMessage("Warning: pipeline_options.yaml not loaded — using defaults", 5000);
+        appendDiagWarning("pipeline_options.yaml not found or invalid — using built-in defaults");
     m_pipelineOpts = loaded.value_or(PipelineOptionsLoader::fallback());
 
     auto* watermark = new QLabel("M", sidebar);
@@ -618,6 +621,17 @@ void MainWindow::onTranslateDone(int rc)
 }
 
 // ============================================================================
+//  Diagnostics helper
+// ============================================================================
+
+void MainWindow::appendDiagWarning(const QString& msg)
+{
+    if (!m_diagEditor) return;
+    m_diagEditor->appendPlainText("[WARN] " + msg);
+    statusBar()->showMessage(msg, 5000);
+}
+
+// ============================================================================
 //  Parsowanie motionbridge_result.yaml i ładowanie plików do edytorów
 // ============================================================================
 
@@ -652,7 +666,7 @@ void MainWindow::parseAndLoadResults()
 
     if (!srcContent.isEmpty())  m_srcEditor->setPlainText(srcContent);
     if (!datContent.isEmpty())  m_datEditor->setPlainText(datContent);
-    if (!diagContent.isEmpty()) m_diagEditor->setPlainText(diagContent);
+    if (!diagContent.isEmpty()) m_diagEditor->appendPlainText(diagContent);
 }
 
 // ============================================================================
@@ -768,7 +782,7 @@ void MainWindow::loadFile(QPlainTextEdit *target, const QString &filter)
 
     QFile f(path);
     if (!f.open(QFile::ReadOnly | QFile::Text)) {
-        statusBar()->showMessage("Error: could not open " + path, 4000);
+        appendDiagWarning("Cannot open file: " + path);
         return;
     }
     target->setPlainText(QString::fromUtf8(f.readAll()));

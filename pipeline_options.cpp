@@ -150,14 +150,15 @@ PipelineOptions PipelineOptionsLoader::fallback()
     BackendOption kuka;
     kuka.id     = "kuka_krl";
     kuka.label  = "KUKA KRL";
-    kuka.robots = {{"kr640_r2800_2", "KUKA KR 640 R2800-2"},
-                   {"kr4_r600",      "KUKA KR 4 R600"}};
+    kuka.robots = {
+        {"kuka_krl_kr640",   "KR 640 R2800-2"},
+        {"kuka_krl_kr4r600", "KR 4 R600"},
+    };
 
     BackendOption ur;
-    ur.id     = "urscript";
-    ur.label  = "URScript";
-    ur.robots = {{"ur5e",  "UR5e"},
-                 {"ur10e", "UR10e"}};
+    ur.id    = "urscript";
+    ur.label = "URScript";
+    // robots: puste — silnik nie rozróżnia modeli UR (jeden backend URScript)
 
     BackendOption pseudo;
     pseudo.id    = "pseudo_robot_3d";
