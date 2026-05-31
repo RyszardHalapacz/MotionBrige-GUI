@@ -1,5 +1,4 @@
- git checkout main
-  git merge feature/qt-splash-screenfrontends:
+frontends:
   - id: gcode_printer3d
     label: GCode 3D Printer
   - id: gcode_cnc
@@ -9,23 +8,13 @@ backends:
   - id: kuka_krl
     label: KUKA KRL
     robots:
-      - id: kr640_r2800_2
-        label: KUKA KR 640 R2800-2
-      - id: kr4_r600
-        label: KUKA KR 4 R600
-
+      - id: kuka_krl_kr640
+        label: KR 640 R2800-2
+      - id: kuka_krl_kr4r600
+        label: KR 4 R600
   - id: urscript
     label: URScript
-    robots:
-      - id: ur5e
-        label: UR5e
-      - id: ur10e
-        label: UR10e
-
   - id: pseudo_robot_3d
     label: Pseudo Robot 3D
-    robots: []
-
   - id: debug
     label: Debug
-    robots: []

@@ -329,7 +329,7 @@ QWidget* MainWindow::buildSideBar()
     const QString yamlPath = g_configPath.isEmpty() ? ":/config/pipeline_options.yaml" : g_configPath;
     const auto loaded = PipelineOptionsLoader::load(yamlPath);
     if (!loaded)
-        statusBar()->showMessage("Warning: pipeline_options.yaml not loaded — using defaults", 5000);
+        appendDiagWarning("pipeline_options.yaml not found or invalid — using built-in defaults");
     m_pipelineOpts = loaded.value_or(PipelineOptionsLoader::fallback());
 
     auto* watermark = new QLabel("M", sidebar);
@@ -516,9 +516,15 @@ void MainWindow::onTranslate()
                 s << "  reference_context: \"" << ctxPath << "\"\n";
             }
             s << "translation:\n"
-              << "  frontend: \"" << m_frontendCombo->currentData().toString() << "\"\n"
-              << "  backend:  \"" << m_backendCombo->currentData().toString()  << "\"\n"
-              << "  robot:    \"" << m_robotCombo->currentData().toString()    << "\"\n"
+              << "  frontend: \"" << m_frontendCombo->currentData().toString() << "\"\n";
+
+            // Gdy robot combo aktywny i ma wybór → użyj pełnego ID robota
+            // (np. "kuka_krl_kr640"). Gdy pusty/nieaktywny → użyj ID backendu
+            // (np. "urscript", "debug").
+            const QString backendId = (m_robotCombo->isEnabled() && m_robotCombo->count() > 0)
+                ? m_robotCombo->currentData().toString()
+                : m_backendCombo->currentData().toString();
+            s << "  backend:  \"" << backendId << "\"\n"
               << "output:\n"
               << "  dir:           \"" << workDir << "\"\n"
               << "  result_file:   \"motionbridge_result.yaml\"\n"
@@ -617,6 +623,17 @@ void MainWindow::onTranslateDone(int rc)
 }
 
 // ============================================================================
+//  Diagnostics helper
+// ============================================================================
+
+void MainWindow::appendDiagWarning(const QString& msg)
+{
+    if (m_diagEditor)
+        m_diagEditor->appendPlainText("[WARN] " + msg);
+    statusBar()->showMessage(msg, 5000);
+}
+
+// ============================================================================
 //  Parsowanie motionbridge_result.yaml i ładowanie plików do edytorów
 // ============================================================================
 
@@ -651,7 +668,7 @@ void MainWindow::parseAndLoadResults()
 
     if (!srcContent.isEmpty())  m_srcEditor->setPlainText(srcContent);
     if (!datContent.isEmpty())  m_datEditor->setPlainText(datContent);
-    if (!diagContent.isEmpty()) m_diagEditor->setPlainText(diagContent);
+    if (!diagContent.isEmpty()) m_diagEditor->appendPlainText(diagContent);
 }
 
 // ============================================================================
@@ -767,7 +784,7 @@ void MainWindow::loadFile(QPlainTextEdit *target, const QString &filter)
 
     QFile f(path);
     if (!f.open(QFile::ReadOnly | QFile::Text)) {
-        statusBar()->showMessage("Error: could not open " + path, 4000);
+        appendDiagWarning("Cannot open file: " + path);
         return;
     }
     target->setPlainText(QString::fromUtf8(f.readAll()));
